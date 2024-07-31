@@ -7,6 +7,7 @@ WelcomeScreen::WelcomeScreen(unsigned int windowWidth, unsigned int windowHeight
     if (!font.loadFromFile("files/font.ttf")) {
         std::cerr << "Error loading font" << std::endl;
         // Handle error, e.g., throw an exception or exit
+        return;
     }
 
     welcomeText.setFont(font);
@@ -14,20 +15,16 @@ WelcomeScreen::WelcomeScreen(unsigned int windowWidth, unsigned int windowHeight
     welcomeText.setCharacterSize(24);
     welcomeText.setFillColor(sf::Color::White);
     welcomeText.setStyle(sf::Text::Underlined);
-    welcomeText.setStyle(sf::Text::Bold);
 
     promptText.setFont(font);
     promptText.setString("Enter your name:");
     promptText.setCharacterSize(20);
     promptText.setFillColor(sf::Color::White);
-    promptText.setStyle(sf::Text::Bold);
 
     userText.setFont(font);
     userText.setCharacterSize(18);
     userText.setFillColor(sf::Color::Yellow);
-    userText.setStyle(sf::Text::Bold);
-    
-    // Set the position of the text using the helper function
+
     setTextProperties(welcomeText, windowWidth / 2.0f, (windowHeight / 2.0f) - 150);
     setTextProperties(promptText, windowWidth / 2.0f, (windowHeight / 2.0f) - 75);
     updateUserTextPosition();
@@ -58,12 +55,12 @@ void WelcomeScreen::handleEvent(sf::RenderWindow &window, sf::Event &event) {
     if (event.type == sf::Event::TextEntered) {
         if (event.text.unicode < 128) {
             char enteredChar = static_cast<char>(event.text.unicode);
-            if (enteredChar == '\b') { 
+            if (enteredChar == '\b') {
                 if (!userInput.empty()) {
                     userInput.pop_back();
                 }
-            } else if (std::isalpha(enteredChar)) { 
-                if (userInput.size() < 10) { 
+            } else if (std::isalpha(enteredChar)) {
+                if (userInput.size() < 10) {
                     userInput += enteredChar;
                     formatUserInput(userInput);
                 }
@@ -82,11 +79,11 @@ bool WelcomeScreen::shouldClose() const {
 }
 
 void WelcomeScreen::update() {
-    // Update logic if needed
+    // Any updates required for the welcome screen
 }
 
 void WelcomeScreen::render(sf::RenderWindow &window) {
-    window.clear(sf::Color::Blue); // Set background to blue
+    window.clear(sf::Color::Blue);
     window.draw(welcomeText);
     window.draw(promptText);
     window.draw(userText);

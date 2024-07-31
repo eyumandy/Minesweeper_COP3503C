@@ -1,7 +1,8 @@
-#ifndef WELCOME_SCREEN_HPP
-#define WELCOME_SCREEN_HPP
+#ifndef WELCOME_SCREEN_H
+#define WELCOME_SCREEN_H
 
 #include <SFML/Graphics.hpp>
+#include <string>
 
 class WelcomeScreen {
 public:
@@ -10,11 +11,11 @@ public:
     void update();
     void render(sf::RenderWindow &window);
     bool shouldClose() const;
+
 private:
     void setTextProperties(sf::Text &text, float x, float y);
-    void capitalizeFirstLetter(std::string &text);
-    void updateUserTextPosition();
     void formatUserInput(std::string &text);
+    void updateUserTextPosition();
 
     sf::Text welcomeText;
     sf::Text promptText;

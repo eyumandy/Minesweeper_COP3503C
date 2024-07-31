@@ -1,5 +1,6 @@
 #include "include/Config.h"
 #include <fstream>
+#include <iostream>
 #include <stdexcept>
 
 Config::Config(const std::string& filePath) {
@@ -17,6 +18,8 @@ void Config::loadConfig(const std::string& filePath) {
     if (file.fail()) {
         throw std::runtime_error("Error reading config file");
     }
+
+    std::cout << "Config loaded: " << columns << " columns, " << rows << " rows, " << mines << " mines" << std::endl;
 }
 
 int Config::getColumns() const {

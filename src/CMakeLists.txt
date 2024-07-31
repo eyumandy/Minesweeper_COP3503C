@@ -15,10 +15,10 @@ include_directories(include)
 add_executable(minesweeper
     main.cpp
     Config.cpp
-    Game.cpp
     WelcomeScreen.cpp
     GameScreen.cpp
-    Singleton.cpp
+    LeaderboardScreen.cpp
+    Board.cpp
 )
 
 # Link SFML libraries
