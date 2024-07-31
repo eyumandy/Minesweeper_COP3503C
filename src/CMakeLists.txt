@@ -17,6 +17,7 @@ add_executable(minesweeper
     Config.cpp
     Game.cpp
     WelcomeScreen.cpp
+    GameScreen.cpp
     Singleton.cpp
 )
 
