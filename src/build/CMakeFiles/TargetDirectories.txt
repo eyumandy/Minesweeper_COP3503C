@@ -1,0 +1,3 @@
+/home/yumandy/COP3503C/minesweeper/src/build/CMakeFiles/minesweeper.dir
+/home/yumandy/COP3503C/minesweeper/src/build/CMakeFiles/edit_cache.dir
+/home/yumandy/COP3503C/minesweeper/src/build/CMakeFiles/rebuild_cache.dir

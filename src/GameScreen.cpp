@@ -2,7 +2,7 @@
 #include <iostream>
 
 GameScreen::GameScreen(unsigned int windowWidth, unsigned int windowHeight, int rows, int cols, int mines)
-    : windowWidth(windowWidth), windowHeight(windowHeight), rows(rows), cols(cols), mines(mines), board(rows, cols, mines), isPlaying(true), gameLost(false), debugMode(false), gameWon(false), isPaused(false), flagsPlaced(0), totalPausedDuration(0), pausedTime(0) {
+    : windowWidth(windowWidth), windowHeight(windowHeight), rows(rows), cols(cols), mines(mines), board(rows, cols, mines), isPlaying(false), gameLost(false), debugMode(false), gameWon(false), isPaused(false), flagsPlaced(0), totalPausedDuration(0), pausedTime(0), openLeaderboard(false) {
     if (!font.loadFromFile("files/font.ttf")) {
         std::cerr << "Error loading font" << std::endl;
     }
@@ -94,7 +94,7 @@ GameScreen::GameScreen(unsigned int windowWidth, unsigned int windowHeight, int 
     leaderboardButtonSprite.setTexture(leaderboardButtonTexture);
     leaderboardButtonSprite.setPosition((cols * 32) - 176, 32 * (rows + 0.5));
 
-    startTime = std::chrono::high_resolution_clock::now();
+    std::cout << "Game screen size: " << windowWidth << "x" << windowHeight << std::endl;
 }
 
 void GameScreen::handleEvent(sf::RenderWindow &window, sf::Event &event) {
@@ -107,18 +107,7 @@ void GameScreen::handleEvent(sf::RenderWindow &window, sf::Event &event) {
         // Handle mouse clicks on the buttons
         if (playPauseButtonSprite.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
             std::cout << "Clicked on Play/Pause button" << std::endl;
-            // Toggle play/pause button
-            if (isPlaying) {
-                playPauseButtonSprite.setTexture(playButtonTexture);
-                isPaused = true;
-                pauseStart = std::chrono::high_resolution_clock::now();
-            } else {
-                playPauseButtonSprite.setTexture(pauseButtonTexture);
-                isPaused = false;
-                totalPausedDuration += std::chrono::high_resolution_clock::now() - pauseStart;
-                startTime == std::chrono::high_resolution_clock::now() - pausedTime;
-            }
-            isPlaying = !isPlaying;
+            togglePlayPause();
         }
         if (faceSprite.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
             std::cout << "Clicked on Face button" << std::endl;
@@ -130,7 +119,10 @@ void GameScreen::handleEvent(sf::RenderWindow &window, sf::Event &event) {
         }
         if (leaderboardButtonSprite.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
             std::cout << "Clicked on Leaderboard button" << std::endl;
-            // Add logic for Leaderboard button
+            openLeaderboard = true; // Set flag to open leaderboard
+            // Pause the game and update the play/pause button
+            pauseTimer();
+            playPauseButtonSprite.setTexture(playButtonTexture);
         }
 
         // Handle mouse clicks on the board
@@ -156,6 +148,44 @@ void GameScreen::handleEvent(sf::RenderWindow &window, sf::Event &event) {
             }
         }
     }
+}
+
+void GameScreen::togglePlayPause() {
+    if (isPlaying) {
+        pauseTimer();
+        playPauseButtonSprite.setTexture(playButtonTexture);
+    } else {
+        resumeTimer();
+        playPauseButtonSprite.setTexture(pauseButtonTexture);
+    }
+}
+
+void GameScreen::startTimer() {
+    startTime = std::chrono::high_resolution_clock::now();
+    totalPausedDuration = std::chrono::duration<float>(0);
+    pausedTime = std::chrono::duration<float>(0);
+    isPlaying = true;
+    isPaused = false;
+}
+
+void GameScreen::pauseTimer() {
+    if (!isPaused) {
+        isPaused = true;
+        isPlaying = false;
+        pauseStart = std::chrono::high_resolution_clock::now();
+    }
+}
+
+void GameScreen::resumeTimer() {
+    if (isPaused) {
+        isPaused = false;
+        isPlaying = true;
+        totalPausedDuration += std::chrono::high_resolution_clock::now() - pauseStart;
+    }
+}
+
+void GameScreen::resetLeaderboardFlag() {
+    openLeaderboard = false;
 }
 
 void GameScreen::revealTile(int row, int col) {
@@ -213,7 +243,7 @@ void GameScreen::checkWinCondition() {
 void GameScreen::resetGame() {
     gameLost = false;
     gameWon = false;
-    isPlaying = true;
+    isPlaying = true;  // Set to true to automatically start the timer
     isPaused = false;
     flagsPlaced = 0;
     totalPausedDuration = std::chrono::duration<float>(0);
@@ -222,6 +252,7 @@ void GameScreen::resetGame() {
     faceSprite.setTexture(happyFaceTexture);
     playPauseButtonSprite.setTexture(pauseButtonTexture);
     board = Board(rows, cols, mines);
+    openLeaderboard = false;
 
     // Reinitialize boardSprites with hidden tiles
     for (int r = 0; r < rows; ++r) {
@@ -233,7 +264,12 @@ void GameScreen::resetGame() {
 }
 
 void GameScreen::update() {
-    // Update game logic here
+    if (isPlaying && !isPaused) {
+        auto currentTime = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<float> elapsedTime = currentTime - startTime - totalPausedDuration;
+
+        // Update other game logic here
+    }
 }
 
 void GameScreen::render(sf::RenderWindow &window) {
@@ -327,4 +363,8 @@ void GameScreen::drawTimer(sf::RenderWindow &window) {
         digitSprite.setPosition((windowWidth - 97) + i * 21, 32 * (rows + 0.5) + 16);
         window.draw(digitSprite);
     }
+}
+
+bool GameScreen::shouldOpenLeaderboard() const {
+    return openLeaderboard;
 }

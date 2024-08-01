@@ -13,6 +13,11 @@ public:
     void update();
     void render(sf::RenderWindow &window);
     void resetGame();
+    void startTimer();
+    void pauseTimer();
+    void resumeTimer();
+    void resetLeaderboardFlag();
+    bool shouldOpenLeaderboard() const;
 
 private:
     void drawBoard(sf::RenderWindow &window);
@@ -23,6 +28,7 @@ private:
     void revealAdjacentTiles(int row, int col);
     void loseGame();
     void checkWinCondition();
+    void togglePlayPause();  // Added method declaration for toggling play/pause
 
     sf::Text gameText;
     sf::Font font;
@@ -57,6 +63,7 @@ private:
     int cols;
     int mines;
 
+    bool openLeaderboard;
     std::chrono::time_point<std::chrono::high_resolution_clock> startTime;
     std::chrono::time_point<std::chrono::high_resolution_clock> pauseStart;
     std::chrono::duration<float> totalPausedDuration;
