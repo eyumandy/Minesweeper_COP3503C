@@ -6,7 +6,6 @@ WelcomeScreen::WelcomeScreen(unsigned int windowWidth, unsigned int windowHeight
     : windowWidth(windowWidth), windowHeight(windowHeight), closeFlag(false) {
     if (!font.loadFromFile("files/font.ttf")) {
         std::cerr << "Error loading font" << std::endl;
-        // Handle error, e.g., throw an exception or exit
         return;
     }
 
@@ -78,13 +77,22 @@ bool WelcomeScreen::shouldClose() const {
     return closeFlag;
 }
 
-void WelcomeScreen::update() {
-    // Any updates required for the welcome screen
+std::string WelcomeScreen::getPlayerName() const {
+    return userInput;
 }
 
 void WelcomeScreen::render(sf::RenderWindow &window) {
-    window.clear(sf::Color::Blue);
+    window.clear(sf::Color::Blue);  // Use a background color of your choice
+
+    // Draw text elements
     window.draw(welcomeText);
     window.draw(promptText);
     window.draw(userText);
+
+    window.display();
+}
+
+void WelcomeScreen::update() {
+    // Any animations or updates specific to the welcome screen can go here
+    // For example, blinking cursor or animations
 }

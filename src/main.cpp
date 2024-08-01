@@ -39,14 +39,13 @@ private:
                     welcomeScreen.handleEvent(window, event);
                     if (welcomeScreen.shouldClose()) {
                         currentScreen = Screen::Game;
-                        gameScreen.startTimer(); // Start timer when entering game screen
+                        gameScreen.startTimer();
+                        gameScreen.setPlayerName(welcomeScreen.getPlayerName());
                     }
                     break;
                 case Screen::Game:
                     gameScreen.handleEvent(window, event);
-                    if (gameScreen.shouldOpenLeaderboard()) {
-                        openLeaderboard(); // Open leaderboard window
-                    }
+                    // Ensure this condition is managed properly and not causing double openings
                     break;
             }
         }
@@ -76,19 +75,6 @@ private:
         }
 
         window.display();
-    }
-
-    void openLeaderboard() {
-        unsigned int leaderboardWidth = (config.getColumns() * 16);
-        unsigned int leaderboardHeight = (config.getRows() * 16) + 50;
-
-        gameScreen.pauseTimer(); // Pause the timer when entering leaderboard
-
-        LeaderboardScreen leaderboardScreen(leaderboardWidth, leaderboardHeight);
-        leaderboardScreen.run();
-
-        // After closing the leaderboard, keep the timer paused
-        gameScreen.resetLeaderboardFlag();
     }
 
     sf::RenderWindow window;

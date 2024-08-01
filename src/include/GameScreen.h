@@ -1,10 +1,12 @@
-#ifndef GAME_SCREEN_H
-#define GAME_SCREEN_H
+#ifndef GAMESCREEN_H
+#define GAMESCREEN_H
 
 #include <SFML/Graphics.hpp>
-#include "Board.h"
 #include <vector>
+#include <string>
 #include <chrono>
+#include "Board.h"
+#include "LeaderboardEntry.h"
 
 class GameScreen {
 public:
@@ -12,30 +14,52 @@ public:
     void handleEvent(sf::RenderWindow &window, sf::Event &event);
     void update();
     void render(sf::RenderWindow &window);
-    void resetGame();
     void startTimer();
     void pauseTimer();
     void resumeTimer();
-    void resetLeaderboardFlag();
     bool shouldOpenLeaderboard() const;
+    void setPlayerName(const std::string &name);
+    void resetLeaderboardFlag();
 
 private:
-    void drawBoard(sf::RenderWindow &window);
-    void drawButtons(sf::RenderWindow &window);
-    void drawCounter(sf::RenderWindow &window);
-    void drawTimer(sf::RenderWindow &window);
+    void togglePlayPause();
     void revealTile(int row, int col);
     void revealAdjacentTiles(int row, int col);
     void loseGame();
     void checkWinCondition();
-    void togglePlayPause();  // Added method declaration for toggling play/pause
+    void resetGame();
+    void drawBoard(sf::RenderWindow &window);
+    void drawButtons(sf::RenderWindow &window);
+    void drawCounter(sf::RenderWindow &window);
+    void drawTimer(sf::RenderWindow &window);
+    void addEntryToLeaderboard(int minutes, int seconds, const std::string &playerName);
 
-    sf::Text gameText;
     sf::Font font;
+    sf::Text gameText;
+    sf::RenderWindow window;
+    unsigned int windowWidth;
+    unsigned int windowHeight;
+    int rows;
+    int cols;
+    int mines;
+    Board board;
+    bool isPlaying;
+    bool gameLost;
+    bool debugMode;
+    bool gameWon;
+    bool isPaused;
+    int flagsPlaced;
+    std::chrono::time_point<std::chrono::high_resolution_clock> startTime;
+    std::chrono::duration<float> totalPausedDuration;
+    std::chrono::time_point<std::chrono::high_resolution_clock> pauseStart;
+    std::chrono::duration<float> pausedTime;  // Correct type for pausedTime
+    bool openLeaderboard;
+    std::string playerName;
     sf::Texture hiddenTileTexture;
     sf::Texture revealedTileTexture;
     sf::Texture flagTexture;
     sf::Texture mineTexture;
+    std::vector<sf::Texture> numberTextures;
     sf::Texture playButtonTexture;
     sf::Texture pauseButtonTexture;
     sf::Texture happyFaceTexture;
@@ -44,30 +68,11 @@ private:
     sf::Texture debugButtonTexture;
     sf::Texture leaderboardButtonTexture;
     sf::Texture digitsTexture;
-    sf::Texture numberTextures[8];
     sf::Sprite playPauseButtonSprite;
     sf::Sprite faceSprite;
     sf::Sprite debugButtonSprite;
     sf::Sprite leaderboardButtonSprite;
     std::vector<std::vector<sf::Sprite>> boardSprites;
-    bool isPlaying;
-    bool gameLost;
-    bool debugMode;
-    bool gameWon;
-    bool isPaused;
-    int flagsPlaced;
-    unsigned int windowWidth;
-    unsigned int windowHeight;
-    Board board;
-    int rows;
-    int cols;
-    int mines;
-
-    bool openLeaderboard;
-    std::chrono::time_point<std::chrono::high_resolution_clock> startTime;
-    std::chrono::time_point<std::chrono::high_resolution_clock> pauseStart;
-    std::chrono::duration<float> totalPausedDuration;
-    std::chrono::duration<float> pausedTime;
 };
 
 #endif

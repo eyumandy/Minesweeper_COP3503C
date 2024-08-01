@@ -13,8 +13,6 @@ public:
     void loadLeaderboard();
     void saveLeaderboard();
 
-    std::vector<LeaderboardEntry> entries; // Make this public for easier access
-
 private:
     void handleEvent(sf::RenderWindow &window, sf::Event &event);
     void update();
@@ -25,6 +23,7 @@ private:
     unsigned int windowHeight;
     sf::Font font;
     sf::Text leaderboardText;
+    std::vector<LeaderboardEntry> entries; // Make this private for better encapsulation
 };
 
 #endif

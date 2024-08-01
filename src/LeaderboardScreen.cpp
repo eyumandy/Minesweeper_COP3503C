@@ -12,15 +12,15 @@ LeaderboardScreen::LeaderboardScreen(unsigned int windowWidth, unsigned int wind
     }
 
     leaderboardText.setFont(font);
-    leaderboardText.setString("Leaderboard");
-    leaderboardText.setCharacterSize(24);
+    leaderboardText.setString("LEADERBOARD");
+    leaderboardText.setCharacterSize(20);
     leaderboardText.setFillColor(sf::Color::White);
-    leaderboardText.setStyle(sf::Text::Bold);
+    leaderboardText.setStyle(sf::Text::Bold | sf::Text::Underlined);
 
     sf::FloatRect textRect = leaderboardText.getLocalBounds();
     leaderboardText.setOrigin(textRect.left + textRect.width / 2.0f,
                               textRect.top + textRect.height / 2.0f);
-    leaderboardText.setPosition(windowWidth / 2.0f, 50);
+    leaderboardText.setPosition(windowWidth / 2.0f, windowHeight / 2.0f - 120);
 
     // Load leaderboard entries from file
     loadLeaderboard();
@@ -63,16 +63,21 @@ void LeaderboardScreen::render(sf::RenderWindow &window) {
     for (size_t i = 0; i < entries.size(); ++i) {
         sf::Text entryText;
         entryText.setFont(font);
-        entryText.setCharacterSize(20);
+        entryText.setCharacterSize(18);
         entryText.setFillColor(sf::Color::White);
+        entryText.setStyle(sf::Text::Bold);
 
         std::ostringstream oss;
         oss << (i + 1) << ". " << entries[i].minutes << ":"
             << (entries[i].seconds < 10 ? "0" : "") << entries[i].seconds
-            << "," << entries[i].playerName;
+            << ", " << entries[i].playerName;
 
         entryText.setString(oss.str());
-        entryText.setPosition(50, 100 + i * 30); // Adjust position as needed
+        entryText.setOrigin(entryText.getLocalBounds().width / 2.0f, 0); // Center horizontally
+
+        // Adjust vertical position based on the window height
+        entryText.setPosition(windowWidth / 2.0f, (windowHeight / 2.0f - 80) + i * 30);
+
         window.draw(entryText);
     }
 
@@ -86,7 +91,7 @@ void LeaderboardScreen::addEntry(const LeaderboardEntry &entry) {
 }
 
 void LeaderboardScreen::loadLeaderboard() {
-    std::ifstream file("src/files/leaderboard.txt");
+    std::ifstream file("files/leaderboard.txt");
     if (!file.is_open()) {
         std::cerr << "Could not open leaderboard file." << std::endl;
         return;
@@ -100,14 +105,19 @@ void LeaderboardScreen::loadLeaderboard() {
         if (std::getline(ss, time, ',') && std::getline(ss, name)) {
             int minutes, seconds;
             sscanf(time.c_str(), "%d:%d", &minutes, &seconds);
-            entries.push_back({minutes, seconds, name});
+            LeaderboardEntry entry = {minutes, seconds, name};
+            entries.push_back(entry);
+
+            // Output the entry to the console
+            std::cout << "Loaded Entry: " << minutes << ":" << (seconds < 10 ? "0" : "") << seconds
+                      << ", " << name << std::endl;
         }
     }
     file.close();
 }
 
 void LeaderboardScreen::saveLeaderboard() {
-    std::ofstream file("src/files/leaderboard.txt");
+    std::ofstream file("files/leaderboard.txt");
     if (!file.is_open()) {
         std::cerr << "Could not open leaderboard file for writing." << std::endl;
         return;

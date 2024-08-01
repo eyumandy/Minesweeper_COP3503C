@@ -1,5 +1,5 @@
-#ifndef WELCOME_SCREEN_H
-#define WELCOME_SCREEN_H
+#ifndef WELCOMESCREEN_H
+#define WELCOMESCREEN_H
 
 #include <SFML/Graphics.hpp>
 #include <string>
@@ -8,23 +8,26 @@ class WelcomeScreen {
 public:
     WelcomeScreen(unsigned int windowWidth, unsigned int windowHeight);
     void handleEvent(sf::RenderWindow &window, sf::Event &event);
-    void update();
-    void render(sf::RenderWindow &window);
     bool shouldClose() const;
+    std::string getPlayerName() const;
+
+    // Declare the render and update functions
+    void render(sf::RenderWindow &window);
+    void update();
 
 private:
     void setTextProperties(sf::Text &text, float x, float y);
     void formatUserInput(std::string &text);
     void updateUserTextPosition();
 
+    sf::Font font;
     sf::Text welcomeText;
     sf::Text promptText;
     sf::Text userText;
-    sf::Font font;
-    std::string userInput;
     unsigned int windowWidth;
     unsigned int windowHeight;
     bool closeFlag;
+    std::string userInput;
 };
 
 #endif
