@@ -369,37 +369,47 @@ void GameScreen::render(sf::RenderWindow &window) {
 void GameScreen::drawBoard(sf::RenderWindow &window) {
     for (int r = 0; r < boardSprites.size(); ++r) {
         for (int c = 0; c < boardSprites[r].size(); ++c) {
-            // Draw hidden tiles
-            window.draw(boardSprites[r][c]);
+            if (isPaused) {
+                // Display the revealed texture when paused, regardless of the tile state
+                boardSprites[r][c].setTexture(revealedTileTexture);
+            } else {
+                // Reset to hidden texture for tiles that are still hidden
+                if (board.getTileState(r, c) == TileState::Hidden) {
+                    boardSprites[r][c].setTexture(hiddenTileTexture);
+                }
+            }
 
-            // Check if the tile is revealed or flagged
-            if (board.getTileState(r, c) == TileState::Revealed) {
-                boardSprites[r][c].setTexture(revealedTileTexture); // Set the revealed texture
-                window.draw(boardSprites[r][c]); // Draw the revealed texture
+            window.draw(boardSprites[r][c]); // Draw the tile
 
-                if (board.hasMine(r, c)) {
+            // When not paused, handle drawing of mines and numbers
+            if (!isPaused) {
+                if (board.getTileState(r, c) == TileState::Revealed) {
+                    if (board.hasMine(r, c)) {
+                        sf::Sprite mineSprite(mineTexture);
+                        mineSprite.setPosition(c * 32, r * 32);
+                        window.draw(mineSprite);
+                    } else {
+                        int adjacentMines = board.getAdjacentMines(r, c);
+                        if (adjacentMines > 0) {
+                            sf::Sprite numberSprite(numberTextures[adjacentMines - 1]);
+                            numberSprite.setPosition(c * 32, r * 32);
+                            window.draw(numberSprite);
+                        } else {
+                            boardSprites[r][c].setTexture(revealedTileTexture);
+                        }
+                    }
+                } else if (board.getTileState(r, c) == TileState::Flagged) {
+                    sf::Sprite flagSprite(flagTexture);
+                    flagSprite.setPosition(c * 32, r * 32);
+                    window.draw(flagSprite);
+                }
+
+                // Debug mode: show mines without changing tile texture
+                if (debugMode && board.hasMine(r, c) && board.getTileState(r, c) == TileState::Hidden) {
                     sf::Sprite mineSprite(mineTexture);
                     mineSprite.setPosition(c * 32, r * 32);
                     window.draw(mineSprite);
-                } else {
-                    int adjacentMines = board.getAdjacentMines(r, c);
-                    if (adjacentMines > 0) {
-                        sf::Sprite numberSprite(numberTextures[adjacentMines - 1]);
-                        numberSprite.setPosition(c * 32, r * 32);
-                        window.draw(numberSprite);
-                    }
                 }
-            } else if (board.getTileState(r, c) == TileState::Flagged) {
-                sf::Sprite flagSprite(flagTexture);
-                flagSprite.setPosition(c * 32, r * 32);
-                window.draw(flagSprite);
-            }
-
-            // Debug mode: show mines without changing tile texture
-            if (debugMode && !gameLost && !gameWon && board.hasMine(r, c) && board.getTileState(r, c) == TileState::Hidden) {
-                sf::Sprite mineSprite(mineTexture);
-                mineSprite.setPosition(c * 32, r * 32);
-                window.draw(mineSprite);
             }
         }
     }
