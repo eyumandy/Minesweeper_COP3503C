@@ -197,30 +197,35 @@ void GameScreen::loseGame() {
 }
 
 void GameScreen::checkWinCondition() {
-    bool allMinesFlagged = true;
-    bool allTilesRevealed = true;
+    bool allNonMinesRevealed = true;
 
     for (int r = 0; r < board.getBoard().size(); ++r) {
         for (int c = 0; c < board.getBoard()[r].size(); ++c) {
-            if (board.hasMine(r, c)) {
-                if (board.getTileState(r, c) != TileState::Flagged) {
-                    allMinesFlagged = false;
-                }
-            } else {
+            if (!board.hasMine(r, c)) {
+                // Check if all non-mine tiles are revealed
                 if (board.getTileState(r, c) != TileState::Revealed) {
-                    allTilesRevealed = false;
+                    allNonMinesRevealed = false;
+                    break;
                 }
             }
         }
+        if (!allNonMinesRevealed) break;
     }
 
-    if (allMinesFlagged && allTilesRevealed) {
+    if (allNonMinesRevealed) {
         gameWon = true;
         faceSprite.setTexture(winFaceTexture);
 
-
         isPlaying = false;
         playPauseButtonSprite.setTexture(playButtonTexture);
+
+        for (int r = 0; r < board.getBoard().size(); ++r) {
+            for (int c = 0; c < board.getBoard()[r].size(); ++c) {
+                if (board.hasMine(r, c) && board.getTileState(r, c) == TileState::Hidden) {
+                    board.setTileState(r, c, TileState::Flagged);
+                }
+            }
+        }
 
         auto currentTime = std::chrono::high_resolution_clock::now();
         std::chrono::duration<float> elapsedTime = currentTime - startTime - totalPausedDuration;
@@ -229,11 +234,11 @@ void GameScreen::checkWinCondition() {
         int seconds = totalSeconds % 60;
 
         addEntryToLeaderboard(minutes, seconds, playerName);
-
         openLeaderboard = true;
 
         pauseTimer();
         playPauseButtonSprite.setTexture(playButtonTexture);
+
 
         int leaderboardWidth = (cols * 16);
         int leaderboardHeight = (rows * 16) + 50;
@@ -241,8 +246,10 @@ void GameScreen::checkWinCondition() {
         leaderboardScreen.run();
 
         openLeaderboard = false;
+
     }
 }
+
 
 
 void GameScreen::addEntryToLeaderboard(int minutes, int seconds, const std::string& playerName) {

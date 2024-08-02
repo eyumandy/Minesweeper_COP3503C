@@ -1,5 +1,5 @@
-1:11,Yumandy
-7:01,Alex
-9:04,Bruce
-10:03,Carl
-11:24,Daniel
+0:05,Yumandy
+0:05,Yumandy
+0:06,Yumandy
+0:16,Yumandy
+0:22,Yumandy
