@@ -8,7 +8,6 @@ struct LeaderboardEntry {
     int seconds;
     std::string playerName;
 
-    // Calculate total time in seconds for easier comparison
     int totalSeconds() const {
         return minutes * 60 + seconds;
     }

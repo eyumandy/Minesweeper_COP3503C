@@ -52,7 +52,7 @@ private:
     std::chrono::time_point<std::chrono::high_resolution_clock> startTime;
     std::chrono::duration<float> totalPausedDuration;
     std::chrono::time_point<std::chrono::high_resolution_clock> pauseStart;
-    std::chrono::duration<float> pausedTime;  // Correct type for pausedTime
+    std::chrono::duration<float> pausedTime; 
     bool openLeaderboard;
     std::string playerName;
     sf::Texture hiddenTileTexture;

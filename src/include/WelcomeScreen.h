@@ -11,7 +11,6 @@ public:
     bool shouldClose() const;
     std::string getPlayerName() const;
 
-    // Declare the render and update functions
     void render(sf::RenderWindow &window);
     void update();
 

@@ -23,7 +23,7 @@ private:
     unsigned int windowHeight;
     sf::Font font;
     sf::Text leaderboardText;
-    std::vector<LeaderboardEntry> entries; // Make this private for better encapsulation
+    std::vector<LeaderboardEntry> entries; 
 };
 
 #endif

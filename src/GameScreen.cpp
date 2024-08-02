@@ -7,66 +7,31 @@
 #include <chrono>
 #include <algorithm>
 
-GameScreen::GameScreen(unsigned int windowWidth, unsigned int windowHeight, int rows, int cols, int mines)
-    : windowWidth(windowWidth), windowHeight(windowHeight), rows(rows), cols(cols), mines(mines), board(rows, cols, mines), isPlaying(false), gameLost(false), debugMode(false), gameWon(false), isPaused(false), flagsPlaced(0), totalPausedDuration(0), pausedTime(std::chrono::duration<float>(0)), openLeaderboard(false) {
-    if (!font.loadFromFile("files/font.ttf")) {
-        std::cerr << "Error loading font" << std::endl;
-    }
+GameScreen::GameScreen(unsigned int winWidth, unsigned int winHeight, int numRows, int numCols, int numMines)
+    : windowWidth(winWidth), windowHeight(winHeight), rows(numRows), cols(numCols), mines(numMines),
+      board(numRows, numCols, numMines), isPlaying(false), gameLost(false), debugMode(false), gameWon(false),
+      isPaused(false), flagsPlaced(0), totalPausedDuration(0), pausedTime(std::chrono::duration<float>(0)), openLeaderboard(false) {
 
-    if (!hiddenTileTexture.loadFromFile("files/images/tile_hidden.png")) {
-        std::cerr << "Error loading tile_hidden.png" << std::endl;
-    }
+    font.loadFromFile("files/font.ttf");
+    hiddenTileTexture.loadFromFile("files/images/tile_hidden.png");
+    revealedTileTexture.loadFromFile("files/images/tile_revealed.png");
+    flagTexture.loadFromFile("files/images/flag.png");
+    mineTexture.loadFromFile("files/images/mine.png");
 
-    if (!revealedTileTexture.loadFromFile("files/images/tile_revealed.png")) {
-        std::cerr << "Error loading tile_revealed.png" << std::endl;
-    }
-
-    if (!flagTexture.loadFromFile("files/images/flag.png")) {
-        std::cerr << "Error loading flag.png" << std::endl;
-    }
-
-    if (!mineTexture.loadFromFile("files/images/mine.png")) {
-        std::cerr << "Error loading mine.png" << std::endl;
-    }
-
-    numberTextures.resize(8); // Ensure the vector is properly sized
+    numberTextures.resize(8);
     for (int i = 0; i < 8; ++i) {
-        if (!numberTextures[i].loadFromFile("files/images/number_" + std::to_string(i + 1) + ".png")) {
-            std::cerr << "Error loading number_" << (i + 1) << ".png" << std::endl;
-        }
+        numberTextures[i].loadFromFile("files/images/number_" + std::to_string(i + 1) + ".png");
     }
 
-    if (!playButtonTexture.loadFromFile("files/images/play.png")) {
-        std::cerr << "Error loading play.png" << std::endl;
-    }
+    playButtonTexture.loadFromFile("files/images/play.png");
+    pauseButtonTexture.loadFromFile("files/images/pause.png");
+    happyFaceTexture.loadFromFile("files/images/face_happy.png");
+    sadFaceTexture.loadFromFile("files/images/face_lose.png");
+    winFaceTexture.loadFromFile("files/images/face_win.png");
+    debugButtonTexture.loadFromFile("files/images/debug.png");
+    leaderboardButtonTexture.loadFromFile("files/images/leaderboard.png");
+    digitsTexture.loadFromFile("files/images/digits.png");
 
-    if (!pauseButtonTexture.loadFromFile("files/images/pause.png")) {
-        std::cerr << "Error loading pause.png" << std::endl;
-    }
-
-    if (!happyFaceTexture.loadFromFile("files/images/face_happy.png")) {
-        std::cerr << "Error loading face_happy.png" << std::endl;
-    }
-
-    if (!sadFaceTexture.loadFromFile("files/images/face_lose.png")) {
-        std::cerr << "Error loading face_lose.png" << std::endl;
-    }
-
-    if (!winFaceTexture.loadFromFile("files/images/face_win.png")) {
-        std::cerr << "Error loading face_win.png" << std::endl;
-    }
-
-    if (!debugButtonTexture.loadFromFile("files/images/debug.png")) {
-        std::cerr << "Error loading debug.png" << std::endl;
-    }
-
-    if (!leaderboardButtonTexture.loadFromFile("files/images/leaderboard.png")) {
-        std::cerr << "Error loading leaderboard.png" << std::endl;
-    }
-
-    if (!digitsTexture.loadFromFile("files/images/digits.png")) {
-        std::cerr << "Error loading digits.png" << std::endl;
-    }
 
     gameText.setFont(font);
     gameText.setString("Game Screen");
@@ -74,21 +39,18 @@ GameScreen::GameScreen(unsigned int windowWidth, unsigned int windowHeight, int 
     gameText.setFillColor(sf::Color::White);
     gameText.setStyle(sf::Text::Bold);
 
-    sf::FloatRect textRect = gameText.getLocalBounds();
-    gameText.setOrigin(textRect.left + textRect.width / 2.0f,
-                       textRect.top + textRect.height / 2.0f);
+    sf::FloatRect textBounds = gameText.getLocalBounds();
+    gameText.setOrigin(textBounds.left + textBounds.width / 2.0f, textBounds.top + textBounds.height / 2.0f);
     gameText.setPosition(windowWidth / 2.0f, 50);
 
-    // Initialize boardSprites with hidden tiles
     boardSprites.resize(rows, std::vector<sf::Sprite>(cols));
     for (int r = 0; r < rows; ++r) {
         for (int c = 0; c < cols; ++c) {
             boardSprites[r][c].setTexture(hiddenTileTexture);
-            boardSprites[r][c].setPosition(c * 32, r * 32); // Offset for game text
+            boardSprites[r][c].setPosition(c * 32, r * 32);
         }
     }
 
-    // Initialize button sprites
     playPauseButtonSprite.setTexture(pauseButtonTexture);
     playPauseButtonSprite.setPosition((cols * 32) - 240, 32 * (rows + 0.5));
 
@@ -101,7 +63,7 @@ GameScreen::GameScreen(unsigned int windowWidth, unsigned int windowHeight, int 
     leaderboardButtonSprite.setTexture(leaderboardButtonTexture);
     leaderboardButtonSprite.setPosition((cols * 32) - 176, 32 * (rows + 0.5));
 
-    std::cout << "Game screen size: " << windowWidth << "x" << windowHeight << std::endl;
+    std::cout << "Initialized game screen with dimensions: " << windowWidth << "x" << windowHeight << std::endl;
 }
 
 void GameScreen::handleEvent(sf::RenderWindow &window, sf::Event &event) {
@@ -111,43 +73,38 @@ void GameScreen::handleEvent(sf::RenderWindow &window, sf::Event &event) {
     if (event.type == sf::Event::MouseButtonPressed) {
         sf::Vector2i mousePos = sf::Mouse::getPosition(window);
 
-        // Handle mouse clicks on the buttons
         if (playPauseButtonSprite.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
-            std::cout << "Clicked on Play/Pause button" << std::endl;
+            std::cout << "Play/Pause button clicked" << std::endl;
             togglePlayPause();
         }
         if (faceSprite.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
-            std::cout << "Clicked on Face button" << std::endl;
+            std::cout << "Face button clicked" << std::endl;
             resetGame();
         }
         if (!gameLost && !gameWon && debugButtonSprite.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
-            std::cout << "Clicked on Debug button" << std::endl;
+            std::cout << "Debug button clicked" << std::endl;
             debugMode = !debugMode;
         }
         if (leaderboardButtonSprite.getGlobalBounds().contains(mousePos.x, mousePos.y) && !openLeaderboard) {
-            std::cout << "Clicked on Leaderboard button" << std::endl;
-            openLeaderboard = true; // Set flag to open leaderboard
+            std::cout << "Leaderboard button clicked" << std::endl;
+            openLeaderboard = true;
 
-            // Pause the game and update the play/pause button
             pauseTimer();
             playPauseButtonSprite.setTexture(playButtonTexture);
 
-            // Calculate leaderboard dimensions and open leaderboard window
             int leaderboardWidth = (cols * 16);
             int leaderboardHeight = (rows * 16) + 50;
             LeaderboardScreen leaderboardScreen(leaderboardWidth, leaderboardHeight);
             leaderboardScreen.run();
 
-            // Reset the openLeaderboard flag after the leaderboard is shown
             openLeaderboard = false;
         }
 
-        // Handle mouse clicks on the board
         if (!gameLost && !gameWon && !isPaused) {
             for (int r = 0; r < boardSprites.size(); ++r) {
                 for (int c = 0; c < boardSprites[r].size(); ++c) {
-                    sf::FloatRect bounds = boardSprites[r][c].getGlobalBounds();
-                    if (bounds.contains(mousePos.x, mousePos.y)) {
+                    sf::FloatRect tileBounds = boardSprites[r][c].getGlobalBounds();
+                    if (tileBounds.contains(mousePos.x, mousePos.y)) {
                         if (event.mouseButton.button == sf::Mouse::Left) {
                             revealTile(r, c);
                         } else if (event.mouseButton.button == sf::Mouse::Right) {
@@ -168,13 +125,8 @@ void GameScreen::handleEvent(sf::RenderWindow &window, sf::Event &event) {
 }
 
 void GameScreen::togglePlayPause() {
-    if (isPlaying) {
-        pauseTimer();
-        playPauseButtonSprite.setTexture(playButtonTexture);
-    } else {
-        resumeTimer();
-        playPauseButtonSprite.setTexture(pauseButtonTexture);
-    }
+    isPlaying ? pauseTimer() : resumeTimer();
+    playPauseButtonSprite.setTexture(isPlaying ? pauseButtonTexture : playButtonTexture);
 }
 
 void GameScreen::startTimer() {
@@ -211,8 +163,8 @@ void GameScreen::revealTile(int row, int col) {
     if (board.hasMine(row, col)) {
         loseGame();
     } else {
-        int adjacentMines = board.getAdjacentMines(row, col);
-        if (adjacentMines == 0) {
+        int nearbyMines = board.getAdjacentMines(row, col);
+        if (nearbyMines == 0) {
             revealAdjacentTiles(row, col);
         }
         checkWinCondition();
@@ -242,85 +194,89 @@ void GameScreen::loseGame() {
             }
         }
     }
-    // Add additional logic to end the game
 }
 
 void GameScreen::checkWinCondition() {
-    bool allBombsFlagged = true;
-    bool allNonBombsRevealed = true;
+    bool allMinesFlagged = true;
+    bool allTilesRevealed = true;
 
     for (int r = 0; r < board.getBoard().size(); ++r) {
         for (int c = 0; c < board.getBoard()[r].size(); ++c) {
             if (board.hasMine(r, c)) {
-                // Check if every bomb is flagged
                 if (board.getTileState(r, c) != TileState::Flagged) {
-                    allBombsFlagged = false;
+                    allMinesFlagged = false;
                 }
             } else {
-                // Check if all non-bomb tiles are revealed
                 if (board.getTileState(r, c) != TileState::Revealed) {
-                    allNonBombsRevealed = false;
+                    allTilesRevealed = false;
                 }
             }
         }
     }
 
-    if (allBombsFlagged && allNonBombsRevealed) {
+    if (allMinesFlagged && allTilesRevealed) {
         gameWon = true;
         faceSprite.setTexture(winFaceTexture);
 
-        // Stop the timer on win and change play/pause button
+
         isPlaying = false;
         playPauseButtonSprite.setTexture(playButtonTexture);
 
-        // Calculate elapsed time
         auto currentTime = std::chrono::high_resolution_clock::now();
         std::chrono::duration<float> elapsedTime = currentTime - startTime - totalPausedDuration;
         int totalSeconds = static_cast<int>(elapsedTime.count());
         int minutes = totalSeconds / 60;
         int seconds = totalSeconds % 60;
 
-        // Add the entry to the leaderboard
         addEntryToLeaderboard(minutes, seconds, playerName);
+
+        openLeaderboard = true;
+
+        pauseTimer();
+        playPauseButtonSprite.setTexture(playButtonTexture);
+
+        int leaderboardWidth = (cols * 16);
+        int leaderboardHeight = (rows * 16) + 50;
+        LeaderboardScreen leaderboardScreen(leaderboardWidth, leaderboardHeight);
+        leaderboardScreen.run();
+
+        openLeaderboard = false;
     }
 }
+
+
 void GameScreen::addEntryToLeaderboard(int minutes, int seconds, const std::string& playerName) {
-    // Read existing entries
-    std::vector<LeaderboardEntry> entries;
-    std::ifstream file("files/leaderboard.txt");
-    if (file.is_open()) {
+    std::vector<LeaderboardEntry> leaderboard;
+    std::ifstream inputFile("files/leaderboard.txt");
+    if (inputFile.is_open()) {
         std::string line;
-        while (std::getline(file, line)) {
-            std::stringstream ss(line);
+        while (std::getline(inputFile, line)) {
+            std::stringstream lineStream(line);
             std::string time, name;
-            if (std::getline(ss, time, ',') && std::getline(ss, name)) {
+            if (std::getline(lineStream, time, ',') && std::getline(lineStream, name)) {
                 int min, sec;
                 sscanf(time.c_str(), "%d:%d", &min, &sec);
-                entries.push_back({min, sec, name});
+                leaderboard.push_back({min, sec, name});
             }
         }
-        file.close();
+        inputFile.close();
     }
 
-    // Add the new entry
-    entries.push_back({minutes, seconds, playerName});
+    leaderboard.push_back({minutes, seconds, playerName});
 
-    // Sort the entries by total time
-    std::sort(entries.begin(), entries.end(), [](const LeaderboardEntry &a, const LeaderboardEntry &b) {
+    std::sort(leaderboard.begin(), leaderboard.end(), [](const LeaderboardEntry &a, const LeaderboardEntry &b) {
         return a.totalSeconds() < b.totalSeconds();
     });
 
-    // Write back the top 5 entries
-    std::ofstream outFile("files/leaderboard.txt");
-    if (outFile.is_open()) {
-        for (int i = 0; i < std::min(5, (int)entries.size()); ++i) {
-            outFile << entries[i].minutes << ":" << (entries[i].seconds < 10 ? "0" : "")
-                    << entries[i].seconds << "," << entries[i].playerName << std::endl;
+    std::ofstream outputFile("files/leaderboard.txt");
+    if (outputFile.is_open()) {
+        for (int i = 0; i < std::min(5, (int)leaderboard.size()); ++i) {
+            outputFile << leaderboard[i].minutes << ":" << (leaderboard[i].seconds < 10 ? "0" : "")
+                       << leaderboard[i].seconds << "," << leaderboard[i].playerName << std::endl;
         }
-        outFile.close();
+        outputFile.close();
     }
 
-    // Output the new entry to the console
     std::cout << "New Leaderboard Entry: " << minutes << ":" << (seconds < 10 ? "0" : "") << seconds
               << "," << playerName << std::endl;
 }
@@ -328,18 +284,17 @@ void GameScreen::addEntryToLeaderboard(int minutes, int seconds, const std::stri
 void GameScreen::resetGame() {
     gameLost = false;
     gameWon = false;
-    isPlaying = true;  // Set to true to automatically start the timer
+    isPlaying = true;
     isPaused = false;
     flagsPlaced = 0;
     totalPausedDuration = std::chrono::duration<float>(0);
-    pausedTime = std::chrono::duration<float>(0);  // Correct initialization
+    pausedTime = std::chrono::duration<float>(0);
     startTime = std::chrono::high_resolution_clock::now();
     faceSprite.setTexture(happyFaceTexture);
     playPauseButtonSprite.setTexture(pauseButtonTexture);
     board = Board(rows, cols, mines);
     openLeaderboard = false;
 
-    // Reinitialize boardSprites with hidden tiles
     for (int r = 0; r < rows; ++r) {
         for (int c = 0; c < cols; ++c) {
             boardSprites[r][c].setTexture(hiddenTileTexture);
@@ -352,13 +307,13 @@ void GameScreen::update() {
     if (isPlaying && !isPaused) {
         auto currentTime = std::chrono::high_resolution_clock::now();
         std::chrono::duration<float> elapsedTime = currentTime - startTime - totalPausedDuration;
-
-        // Update other game logic here
     }
 }
 
+
+
 void GameScreen::render(sf::RenderWindow &window) {
-    window.clear(sf::Color::White); // Set background to white
+    window.clear(sf::Color::White);
     window.draw(gameText);
     drawBoard(window);
     drawButtons(window);
@@ -369,20 +324,20 @@ void GameScreen::render(sf::RenderWindow &window) {
 void GameScreen::drawBoard(sf::RenderWindow &window) {
     for (int r = 0; r < boardSprites.size(); ++r) {
         for (int c = 0; c < boardSprites[r].size(); ++c) {
-            if (isPaused) {
-                // Display the revealed texture when paused, regardless of the tile state
+            if (isPaused && !gameWon) {
                 boardSprites[r][c].setTexture(revealedTileTexture);
             } else {
-                // Reset to hidden texture for tiles that are still hidden
-                if (board.getTileState(r, c) == TileState::Hidden) {
+                if (board.getTileState(r, c) == TileState::Hidden || board.getTileState(r, c) == TileState::Flagged) {
                     boardSprites[r][c].setTexture(hiddenTileTexture);
+                } else if (board.getTileState(r, c) == TileState::Revealed) {
+                    boardSprites[r][c].setTexture(revealedTileTexture);
                 }
             }
 
-            window.draw(boardSprites[r][c]); // Draw the tile
+            // Draw the base tile
+            window.draw(boardSprites[r][c]);
 
-            // When not paused, handle drawing of mines and numbers
-            if (!isPaused) {
+            if (!isPaused || gameWon) {  // Normal behavior unless paused and game not won
                 if (board.getTileState(r, c) == TileState::Revealed) {
                     if (board.hasMine(r, c)) {
                         sf::Sprite mineSprite(mineTexture);
@@ -394,8 +349,6 @@ void GameScreen::drawBoard(sf::RenderWindow &window) {
                             sf::Sprite numberSprite(numberTextures[adjacentMines - 1]);
                             numberSprite.setPosition(c * 32, r * 32);
                             window.draw(numberSprite);
-                        } else {
-                            boardSprites[r][c].setTexture(revealedTileTexture);
                         }
                     }
                 } else if (board.getTileState(r, c) == TileState::Flagged) {
@@ -404,7 +357,6 @@ void GameScreen::drawBoard(sf::RenderWindow &window) {
                     window.draw(flagSprite);
                 }
 
-                // Debug mode: show mines without changing tile texture
                 if (debugMode && board.hasMine(r, c) && board.getTileState(r, c) == TileState::Hidden) {
                     sf::Sprite mineSprite(mineTexture);
                     mineSprite.setPosition(c * 32, r * 32);
@@ -427,9 +379,9 @@ void GameScreen::drawCounter(sf::RenderWindow &window) {
     bool isNegative = counterValue < 0;
     counterValue = abs(counterValue);
 
-    std::string counterString = std::to_string(counterValue);
-    if (counterString.length() < 3) {
-        counterString.insert(0, 3 - counterString.length(), '0');
+    std::string counterStr = std::to_string(counterValue);
+    if (counterStr.length() < 3) {
+        counterStr.insert(0, 3 - counterStr.length(), '0');
     }
 
     if (isNegative) {
@@ -438,8 +390,8 @@ void GameScreen::drawCounter(sf::RenderWindow &window) {
         window.draw(minusSprite);
     }
 
-    for (int i = 0; i < counterString.length(); ++i) {
-        int digit = counterString[i] - '0';
+    for (int i = 0; i < counterStr.length(); ++i) {
+        int digit = counterStr[i] - '0';
         sf::Sprite digitSprite(digitsTexture, sf::IntRect(digit * 21, 0, 21, 32));
         digitSprite.setPosition(33 + i * 21, 32 * (rows + 0.5) + 16);
         window.draw(digitSprite);
@@ -460,32 +412,30 @@ void GameScreen::drawTimer(sf::RenderWindow &window) {
     int minutes = totalSeconds / 60;
     int seconds = totalSeconds % 60;
 
-    std::string minuteString = std::to_string(minutes);
-    if (minuteString.length() < 2) {
-        minuteString.insert(0, 2 - minuteString.length(), '0');
+    std::string minuteStr = std::to_string(minutes);
+    if (minuteStr.length() < 2) {
+        minuteStr.insert(0, 2 - minuteStr.length(), '0');
     }
 
-    std::string secondString = std::to_string(seconds);
-    if (secondString.length() < 2) {
-        secondString.insert(0, 2 - secondString.length(), '0');
+    std::string secondStr = std::to_string(seconds);
+    if (secondStr.length() < 2) {
+        secondStr.insert(0, 2 - secondStr.length(), '0');
     }
 
-    // Draw minutes
     int startXMinutes = (cols * 32) - 97;
     int startY = 32 * (rows + 0.5) + 16;
 
-    for (int i = 0; i < minuteString.length(); ++i) {
-        int digit = minuteString[i] - '0';
+    for (int i = 0; i < minuteStr.length(); ++i) {
+        int digit = minuteStr[i] - '0';
         sf::Sprite digitSprite(digitsTexture, sf::IntRect(digit * 21, 0, 21, 32));
         digitSprite.setPosition(startXMinutes + i * 21, startY);
         window.draw(digitSprite);
     }
 
-    // Draw seconds
     int startXSeconds = (cols * 32) - 54;
 
-    for (int i = 0; i < secondString.length(); ++i) {
-        int digit = secondString[i] - '0';
+    for (int i = 0; i < secondStr.length(); ++i) {
+        int digit = secondStr[i] - '0';
         sf::Sprite digitSprite(digitsTexture, sf::IntRect(digit * 21, 0, 21, 32));
         digitSprite.setPosition(startXSeconds + i * 21, startY);
         window.draw(digitSprite);
@@ -499,4 +449,3 @@ bool GameScreen::shouldOpenLeaderboard() const {
 void GameScreen::setPlayerName(const std::string &name) {
     playerName = name;
 }
-

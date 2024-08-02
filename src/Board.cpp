@@ -8,11 +8,9 @@ Board::Board(int rows, int cols, int mines)
 }
 
 void Board::initialize() {
-    // Initialize the board with 0s (safe spaces)
     board.resize(rows, std::vector<int>(cols, 0));
     tileStates.resize(rows, std::vector<TileState>(cols, TileState::Hidden));
 
-    // Place mines randomly
     srand(time(0));
     int placedMines = 0;
     while (placedMines < mines) {

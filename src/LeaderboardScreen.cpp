@@ -44,22 +44,19 @@ void LeaderboardScreen::handleEvent(sf::RenderWindow &window, sf::Event &event) 
 }
 
 void LeaderboardScreen::update() {
-    // Sort the leaderboard entries by score
     std::sort(entries.begin(), entries.end(), [](const LeaderboardEntry &a, const LeaderboardEntry &b) {
         return a.totalSeconds() < b.totalSeconds();
     });
 
-    // Keep only the top 5 entries
     if (entries.size() > 5) {
         entries.resize(5);
     }
 }
 
 void LeaderboardScreen::render(sf::RenderWindow &window) {
-    window.clear(sf::Color::Blue); // Set background to blue
+    window.clear(sf::Color::Blue); 
     window.draw(leaderboardText);
 
-    // Display leaderboard entries
     for (size_t i = 0; i < entries.size(); ++i) {
         sf::Text entryText;
         entryText.setFont(font);
@@ -75,7 +72,6 @@ void LeaderboardScreen::render(sf::RenderWindow &window) {
         entryText.setString(oss.str());
         entryText.setOrigin(entryText.getLocalBounds().width / 2.0f, 0); // Center horizontally
 
-        // Adjust vertical position based on the window height
         entryText.setPosition(windowWidth / 2.0f, (windowHeight / 2.0f - 80) + i * 30);
 
         window.draw(entryText);
@@ -86,7 +82,7 @@ void LeaderboardScreen::render(sf::RenderWindow &window) {
 
 void LeaderboardScreen::addEntry(const LeaderboardEntry &entry) {
     entries.push_back(entry);
-    update(); // Sort and keep only top 5
+    update(); 
     saveLeaderboard();
 }
 
@@ -108,7 +104,6 @@ void LeaderboardScreen::loadLeaderboard() {
             LeaderboardEntry entry = {minutes, seconds, name};
             entries.push_back(entry);
 
-            // Output the entry to the console
             std::cout << "Loaded Entry: " << minutes << ":" << (seconds < 10 ? "0" : "") << seconds
                       << ", " << name << std::endl;
         }

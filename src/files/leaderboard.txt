@@ -1,5 +1,5 @@
-0:29,Arpon
-1:09,Yumandy
-1:23,Yumandy
+1:11,Yumandy
 7:01,Alex
 9:04,Bruce
+10:03,Carl
+11:24,Daniel

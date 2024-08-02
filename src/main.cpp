@@ -45,7 +45,6 @@ private:
                     break;
                 case Screen::Game:
                     gameScreen.handleEvent(window, event);
-                    // Ensure this condition is managed properly and not causing double openings
                     break;
             }
         }
